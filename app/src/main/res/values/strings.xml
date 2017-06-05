@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">CalendarWidget</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
+    <string name="no_events">There are no any events</string>
+    <string name="month">Month</string>
+    <string name="default_month">January</string>
+    <string name="data">Data</string>
+    <string name="default_data">1</string>
+</resources>

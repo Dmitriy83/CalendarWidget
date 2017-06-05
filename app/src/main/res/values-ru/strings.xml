@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CalendarWidget</string>
+    <string name="add_widget">Добавить виджет</string>
+    <string name="appwidget_text">Пример</string>
+    <string name="configure">Настройка</string>
+    <string name="no_events">Нет событий календаря</string>
+    <string name="month">Месяц</string>
+    <string name="default_month">Январь</string>
+    <string name="data">Дата</string>
+    <string name="default_data">1</string>
+</resources>
