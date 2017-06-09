@@ -6,7 +6,9 @@
     <string name="configure">Настройка</string>
     <string name="no_events">Нет событий календаря</string>
     <string name="month">Месяц</string>
-    <string name="default_month">Январь</string>
+    <string name="default_month">Янв</string>
     <string name="data">Дата</string>
     <string name="default_data">1</string>
+    <string name="today">Сегодня</string>
+    <string name="tomorrow">Завтра</string>
 </resources>

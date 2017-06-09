@@ -9,6 +9,12 @@ import android.net.Uri;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 public class CalendarWidgetProvider extends AppWidgetProvider {
 
     final static String ACTION_ON_CLICK = "com.rightdirection.calendarwidget.itemonclick";
@@ -17,11 +23,11 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
 
-        CharSequence widgetText = CalendarWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
+        //CharSequence widgetText = CalendarWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
         // Создаем RemoteViews объекты
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.calendar_widget);
 
-        setCalendarDataText(remoteViews, widgetText);
+        setCalendarDataTexts(remoteViews);
         setCalendarDataSheetClick(remoteViews, context, appWidgetId);
         setEventsList(remoteViews, context, appWidgetId);
         setEventsListClick(remoteViews, context);
@@ -38,6 +44,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         // Добавим data к намерению, чтобы сделать его уникальным. Иначе второй и последующие добавленные виджеты будут использовать тоже самое намерение.
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
         remoteViews.setRemoteAdapter(R.id.events, intent);
+        remoteViews.setEmptyView(R.id.events, R.id.empty_view);
     }
 
     static void setEventsListClick(RemoteViews remoteViews, Context context){
@@ -47,9 +54,20 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         remoteViews.setPendingIntentTemplate(R.id.events, listClickPIntent);
     }
 
-    private static void setCalendarDataText(RemoteViews remoteViews, CharSequence widgetText) {
-        // Устанавливаем текст-дату календаря
-        remoteViews.setTextViewText(R.id.calendar_data, widgetText);
+    private static void setCalendarDataTexts(RemoteViews remoteViews) {
+        Date currentDate = new Date(System.currentTimeMillis());
+        // Устанавливаем тексты даты календаря
+        String data = new SimpleDateFormat("d", Locale.getDefault()).format(currentDate);
+        remoteViews.setTextViewText(R.id.calendar_data, data);
+
+        DateFormatSymbols rusDateFormatSymbols = new DateFormatSymbols();
+        if (Locale.getDefault().getLanguage().equals(new Locale("ru").getLanguage())) {
+            rusDateFormatSymbols.setMonths(new String[]{"янв", "февр", "март", "апр", "май", "июнь", "июль", "авг", "сент", "окт", "нояб", "дек"});
+        }else{
+            rusDateFormatSymbols.setMonths(new String[]{"jan", "feb", "mar", "apr", "may", "june", "july", "aug", "sept", "oct", "nov", "dec"});
+        }
+        String month = new SimpleDateFormat("MMMM", rusDateFormatSymbols).format(currentDate);
+        remoteViews.setTextViewText(R.id.calendar_month, month.toUpperCase());
     }
 
     private static void setCalendarDataSheetClick(RemoteViews remoteViews, Context context, int appWidgetId){

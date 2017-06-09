@@ -5,7 +5,9 @@
     <string name="add_widget">Add widget</string>
     <string name="no_events">There are no any events</string>
     <string name="month">Month</string>
-    <string name="default_month">January</string>
+    <string name="default_month">Jan</string>
     <string name="data">Data</string>
     <string name="default_data">1</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
 </resources>
