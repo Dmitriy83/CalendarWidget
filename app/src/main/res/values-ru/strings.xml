@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CalendarWidget</string>
-    <string name="add_widget">Добавить виджет</string>
+    <string name="upgrade_widget">Обновить виджет</string>
     <string name="appwidget_text">Пример</string>
     <string name="configure">Настройка</string>
     <string name="no_events">Нет событий календаря</string>
@@ -11,4 +11,9 @@
     <string name="default_data">1</string>
     <string name="today">Сегодня</string>
     <string name="tomorrow">Завтра</string>
+    <string name="calendar_activity_not_found">Приложение календаря не найдено.</string>
+    <string name="text_color">Цвет текста</string>
+    <string name="background_color">Цвет заднего фона виджета</string>
+    <string name="add_widget">Добавить виджет</string>
+    <string name="event_text_size">Размер текста событий</string>
 </resources>

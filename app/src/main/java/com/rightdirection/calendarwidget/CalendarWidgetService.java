@@ -14,11 +14,14 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
+import com.rightdirection.calendarwidget.POJOs.CalendarEvent;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
+
+import static android.util.TypedValue.COMPLEX_UNIT_SP;
 
 /**
  * Сервис для отображения сервиса календаря. Его вызывает ListAdapter.
@@ -35,11 +38,14 @@ public class CalendarWidgetService extends RemoteViewsService {
  */
 class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
     private static final int COUNT_OF_DISPLAYING_EVENTS = 10;
-    private ArrayList<String> mData;
-    private Context mContext;
+    private final String TAG = this.getClass().getSimpleName();
+    private ArrayList<CalendarEvent> mData;
+    private final Context mContext;
     private int mWidgetID;
+    private int mTextColor;
+    private int mTextSize;
 
-    public CalendarWidgetRemoteViewsFactory(Context context, Intent intent) {
+    CalendarWidgetRemoteViewsFactory(Context context, Intent intent) {
         mContext = context;
         mWidgetID = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
     }
@@ -51,18 +57,21 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
 
     @Override
     public void onDataSetChanged() {
-        showTestEvents();
-        //showEvents();
+        mTextColor = CalendarWidgetConfigureActivity.loadTextColorBackgroundColorPref(mContext, mWidgetID);
+        mTextSize = CalendarWidgetConfigureActivity.loadTextSizePref(mContext, mWidgetID);
+
+        //updateTestEvents();
+        updateEvents();
     }
 
-    private void showTestEvents() {
+    private void updateTestEvents() {
         mData.clear();
         for (int i = 1; i <= 15; i++){
-            mData.add("Date " + i + " Event " + i);
+            mData.add(new CalendarEvent(Calendar.getInstance().getTimeInMillis(), Calendar.getInstance().getTimeInMillis(), " Event " + i, 1));
         }
     }
 
-    private void showEvents(){
+    private void updateEvents(){
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -72,9 +81,12 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
         endTime.add(Calendar.MONTH, 3);
         long entTimeInMillis = endTime.getTimeInMillis();
 
-        String[] projection = new String[]{CalendarContract.Instances.DTSTART, CalendarContract.Instances.TITLE};
+        String[] projection = new String[]{CalendarContract.Instances.BEGIN, CalendarContract.Instances.END,
+                CalendarContract.Instances.TITLE, CalendarContract.Instances.EVENT_ID};
         final int EVENT_START_TIME_INDEX = 0;
-        final int EVENT_TITLE_INDEX = 1;
+        final int EVENT_END_TIME_INDEX = 1;
+        final int EVENT_TITLE_INDEX = 2;
+        final int EVENT_ID_INDEX = 3;
         String selection = CalendarContract.Instances.BEGIN + " >= " + startTimeInMillis + " and "
                 + CalendarContract.Instances.BEGIN + " <= " + entTimeInMillis + " and "
                 + CalendarContract.Instances.VISIBLE + " = 1";
@@ -90,8 +102,7 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
         if (cursor == null) return;
         int i = 1;
         while (cursor.moveToNext() && i <= COUNT_OF_DISPLAYING_EVENTS) {
-            mData.add(getDateString(cursor.getLong(EVENT_START_TIME_INDEX)) + " " + String.valueOf(cursor.getString(EVENT_TITLE_INDEX)));
-            Log.d("showEvents", getDateString(cursor.getLong(EVENT_START_TIME_INDEX)));
+            mData.add(new CalendarEvent(cursor.getLong(EVENT_START_TIME_INDEX), cursor.getLong(EVENT_END_TIME_INDEX),  cursor.getString(EVENT_TITLE_INDEX), cursor.getLong(EVENT_ID_INDEX)));
             i++;
         }
         cursor.close();
@@ -100,21 +111,24 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
     private String getDateString(long timeInMillis) {
         Calendar date = Calendar.getInstance();
         date.setTimeInMillis(timeInMillis);
-        date = getStartOfDay(date);
+
+        Calendar dateStartOfDay = Calendar.getInstance();
+        dateStartOfDay.setTimeInMillis(timeInMillis);
+        getStartOfDay(dateStartOfDay);
 
         Calendar today = getStartOfDay(Calendar.getInstance());
-        if (today.equals(date)){
-            return mContext.getString(R.string.today);
+        if (today.equals(dateStartOfDay)){
+            return mContext.getString(R.string.today) + new SimpleDateFormat(" hh:mm", Locale.getDefault()).format(date.getTime());
         }
 
         Calendar tomorrow = Calendar.getInstance();
         tomorrow.add(Calendar.DATE, 1);
         tomorrow = getStartOfDay(tomorrow);
-        if (tomorrow.equals(date)){
-            return mContext.getString(R.string.tomorrow);
+        if (tomorrow.equals(dateStartOfDay)){
+            return mContext.getString(R.string.tomorrow) + new SimpleDateFormat(" hh:mm", Locale.getDefault()).format(date.getTime());
         }
 
-        return new SimpleDateFormat("dd.MM.yy", Locale.getDefault()).format(date.getTime());
+        return new SimpleDateFormat("dd MMMM hh:mm", Locale.getDefault()).format(date.getTime());
     }
 
     private Calendar getStartOfDay(Calendar time){
@@ -123,12 +137,6 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
         time.set(Calendar.SECOND, 0);
         time.set(Calendar.MILLISECOND, 0);
         return time;
-    }
-
-    private static Calendar toCalendar(Date date){
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        return cal;
     }
 
     @Override
@@ -143,12 +151,17 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
 
     @Override
     public RemoteViews getViewAt(int position) {
+        CalendarEvent event = mData.get(position);
+        if (event == null) return null;
+
         RemoteViews rView = new RemoteViews(mContext.getPackageName(), R.layout.event);
-        rView.setTextViewText(R.id.tvEventText, mData.get(position));
+        rView.setTextViewText(R.id.tvEventText, getDateString(event.getStartTime()) + " " + event.getTitle());
+        rView.setTextColor(R.id.tvEventText, mTextColor);
+        rView.setTextViewTextSize(R.id.tvEventText, COMPLEX_UNIT_SP, mTextSize);
 
         // Добавим обработчик нажатия на элемент списка
         Intent clickIntent = new Intent();
-        clickIntent.putExtra(CalendarWidgetProvider.ITEM_POSITION, position);
+        clickIntent.putExtra(CalendarWidgetProvider.EVENT, event);
         rView.setOnClickFillInIntent(R.id.tvEventText, clickIntent);
 
         return rView;

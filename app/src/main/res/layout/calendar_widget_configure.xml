@@ -5,23 +5,99 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
+    <RelativeLayout
+        android:id="@+id/rl_text_size"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="@string/configure" />
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
-    <EditText
-        android:id="@+id/calendar_data"
+        <TextView
+            android:id="@+id/txt_text_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/et_text_size"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/et_text_size"
+            android:gravity="center_vertical"
+            android:text="@string/event_text_size"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/et_text_size"
+            android:layout_width="80dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/white"
+            android:inputType="numberSigned"
+            />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_text_color"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text" />
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingTop="3dp">
+
+        <TextView
+            android:id="@+id/txt_text_color"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/img_text_color"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/img_text_color"
+            android:gravity="center_vertical"
+            android:text="@string/text_color"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/img_text_color"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:contentDescription="@string/text_color"
+            android:background="@android:color/white" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_background_color"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingTop="3dp">
+
+        <TextView
+            android:id="@+id/txt_background_color"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/img_background_color"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/img_background_color"
+            android:gravity="center_vertical"
+            android:text="@string/background_color"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/img_background_color"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:adjustViewBounds="false"
+            android:contentDescription="@string/background_color"
+            android:background="@android:color/transparent" />
+    </RelativeLayout>
 
     <Button
-        android:id="@+id/add_button"
+        android:id="@+id/add_upgrade_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/add_widget" />
+        android:text="@string/upgrade_widget" />
 
 </LinearLayout>

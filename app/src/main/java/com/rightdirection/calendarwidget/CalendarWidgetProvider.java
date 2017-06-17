@@ -1,24 +1,35 @@
 package com.rightdirection.calendarwidget;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Bundle;
+import android.provider.CalendarContract;
+import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.rightdirection.calendarwidget.POJOs.CalendarEvent;
+
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public class CalendarWidgetProvider extends AppWidgetProvider {
 
-    final static String ACTION_ON_CLICK = "com.rightdirection.calendarwidget.itemonclick";
-    final static String ITEM_POSITION = "item_position";
+    private final static String ACTION_ON_CLICK = "com.rightdirection.calendarwidget.itemonclick";
+    final static String EVENT = "event";
+    private final String TAG = this.getClass().getSimpleName();
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
@@ -26,6 +37,9 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         //CharSequence widgetText = CalendarWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
         // Создаем RemoteViews объекты
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.calendar_widget);
+
+        // Установим цвет заднего фона всего виджета
+        remoteViews.setInt(R.id.calendar, "setBackgroundColor", CalendarWidgetConfigureActivity.loadBackgroundColorBackgroundColorPref(context, appWidgetId));
 
         setCalendarDataTexts(remoteViews);
         setCalendarDataSheetClick(remoteViews, context, appWidgetId);
@@ -37,7 +51,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.events);
     }
 
-    static void setEventsList(RemoteViews remoteViews, Context context, int appWidgetId){
+    private static void setEventsList(RemoteViews remoteViews, Context context, int appWidgetId){
         // Вызываем сервис для заполнения списка событий
         Intent intent = new Intent(context, CalendarWidgetService.class);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
@@ -47,7 +61,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         remoteViews.setEmptyView(R.id.events, R.id.empty_view);
     }
 
-    static void setEventsListClick(RemoteViews remoteViews, Context context){
+    private static void setEventsListClick(RemoteViews remoteViews, Context context){
         Intent listClickIntent = new Intent(context, CalendarWidgetProvider.class);
         listClickIntent.setAction(ACTION_ON_CLICK);
         PendingIntent listClickPIntent = PendingIntent.getBroadcast(context, 0, listClickIntent, 0);
@@ -84,10 +98,23 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         super.onReceive(context, intent);
         // Обрабатываем нажатие на элемент списка
         if (intent.getAction().equalsIgnoreCase(ACTION_ON_CLICK)) {
-            int itemPos = intent.getIntExtra(ITEM_POSITION, -1);
-            if (itemPos != -1) {
-                Toast.makeText(context, "Clicked on item " + itemPos,
-                        Toast.LENGTH_SHORT).show();
+            CalendarEvent event = intent.getParcelableExtra(EVENT);
+            if (event != null) {
+                // Откроем событие
+                Intent eventIntent = new Intent(Intent.ACTION_VIEW);
+                eventIntent.setData(ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.getId()));
+                eventIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.getStartTime());
+                eventIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.getEndTime());
+                eventIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    context.startActivity(eventIntent);
+                } catch (Exception e) {
+                    if (e instanceof ActivityNotFoundException) {
+                        Toast.makeText(context, R.string.calendar_activity_not_found, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.e(TAG, e.getMessage());
+                    }
+                }
             }
         }
     }
@@ -104,7 +131,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     public void onDeleted(Context context, int[] appWidgetIds) {
         // Когда пользоатель удаляет виджет, удаим настройки, связанные с ним
         for (int appWidgetId : appWidgetIds) {
-            CalendarWidgetConfigureActivity.deleteTitlePref(context, appWidgetId);
+            CalendarWidgetConfigureActivity.deletePrefs(context, appWidgetId);
         }
     }
 
