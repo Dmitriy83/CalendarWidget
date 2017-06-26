@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CalendarContract;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
@@ -44,6 +43,7 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
     private int mWidgetID;
     private int mTextColor;
     private int mTextSize;
+    private int mTodayTextColor;
 
     CalendarWidgetRemoteViewsFactory(Context context, Intent intent) {
         mContext = context;
@@ -57,8 +57,9 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
 
     @Override
     public void onDataSetChanged() {
-        mTextColor = CalendarWidgetConfigureActivity.loadTextColorBackgroundColorPref(mContext, mWidgetID);
-        mTextSize = CalendarWidgetConfigureActivity.loadTextSizePref(mContext, mWidgetID);
+        mTextColor = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_TEXT_COLOR);
+        mTextSize = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_TEXT_SIZE);
+        mTodayTextColor = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_TODAY_TEXT_COLOR);
 
         //updateTestEvents();
         updateEvents();
@@ -118,17 +119,17 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
 
         Calendar today = getStartOfDay(Calendar.getInstance());
         if (today.equals(dateStartOfDay)){
-            return mContext.getString(R.string.today) + new SimpleDateFormat(" hh:mm", Locale.getDefault()).format(date.getTime());
+            return mContext.getString(R.string.today) + new SimpleDateFormat(" HH:mm", Locale.getDefault()).format(date.getTime());
         }
 
         Calendar tomorrow = Calendar.getInstance();
         tomorrow.add(Calendar.DATE, 1);
         tomorrow = getStartOfDay(tomorrow);
         if (tomorrow.equals(dateStartOfDay)){
-            return mContext.getString(R.string.tomorrow) + new SimpleDateFormat(" hh:mm", Locale.getDefault()).format(date.getTime());
+            return mContext.getString(R.string.tomorrow) + new SimpleDateFormat(" HH:mm", Locale.getDefault()).format(date.getTime());
         }
 
-        return new SimpleDateFormat("dd MMMM hh:mm", Locale.getDefault()).format(date.getTime());
+        return new SimpleDateFormat("d MMMM HH:mm", Locale.getDefault()).format(date.getTime());
     }
 
     private Calendar getStartOfDay(Calendar time){
@@ -155,8 +156,14 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
         if (event == null) return null;
 
         RemoteViews rView = new RemoteViews(mContext.getPackageName(), R.layout.event);
+
         rView.setTextViewText(R.id.tvEventText, getDateString(event.getStartTime()) + " " + event.getTitle());
-        rView.setTextColor(R.id.tvEventText, mTextColor);
+        if (isToday(event.getStartTime())) {
+            rView.setTextColor(R.id.tvEventText, mTodayTextColor);
+        }else{
+            rView.setTextColor(R.id.tvEventText, mTextColor);
+        }
+
         rView.setTextViewTextSize(R.id.tvEventText, COMPLEX_UNIT_SP, mTextSize);
 
         // Добавим обработчик нажатия на элемент списка
@@ -165,6 +172,15 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
         rView.setOnClickFillInIntent(R.id.tvEventText, clickIntent);
 
         return rView;
+    }
+
+    private boolean isToday(long time) {
+        Calendar startOfDay = Calendar.getInstance();
+        startOfDay.setTimeInMillis(time);
+        getStartOfDay(startOfDay);
+
+        Calendar today = getStartOfDay(Calendar.getInstance());
+        return today.equals(startOfDay);
     }
 
     @Override

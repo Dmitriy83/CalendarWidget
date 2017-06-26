@@ -31,15 +31,77 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     final static String EVENT = "event";
     private final String TAG = this.getClass().getSimpleName();
 
+    @Override
+    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        // На телефоне может быть установлено несколько активных виджетов, поэтому обновим их все
+        for (int appWidgetId : appWidgetIds) {
+            updateAppWidget(context, appWidgetManager, appWidgetId);
+        }
+    }
+
+    @Override
+    public void onDeleted(Context context, int[] appWidgetIds) {
+        // Когда пользоатель удаляет виджет, удаим настройки, связанные с ним
+        for (int appWidgetId : appWidgetIds) {
+            CalendarWidgetConfigureActivity.deletePrefs(context, appWidgetId);
+        }
+    }
+
+    @Override
+    public void onEnabled(Context context) {
+        // Добавить функциональность при создании первого виджета
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+        // Добавить функциональность после отображения последнего виджета
+    }
+
+    @Override
+    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
+        updateAppWidget(context, appWidgetManager, appWidgetId);
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        super.onReceive(context, intent);
+        // Обрабатываем нажатие на элемент списка
+        if (intent.getAction().equalsIgnoreCase(ACTION_ON_CLICK)) {
+            CalendarEvent event = intent.getParcelableExtra(EVENT);
+            if (event != null) {
+                // Откроем событие
+                Intent eventIntent = new Intent(Intent.ACTION_VIEW);
+                eventIntent.setData(ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.getId()));
+                eventIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.getStartTime());
+                eventIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.getEndTime());
+                eventIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    context.startActivity(eventIntent);
+                } catch (Exception e) {
+                    if (e instanceof ActivityNotFoundException) {
+                        Toast.makeText(context, R.string.calendar_activity_not_found, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.e(TAG, e.getMessage());
+                    }
+                }
+            }
+        }
+    }
+
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
 
         //CharSequence widgetText = CalendarWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
         // Создаем RemoteViews объекты
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.calendar_widget);
+        // Получим минимальную высоту виджета
+        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
+        int minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
+        RemoteViews remoteViews = getRemoteViews(context, minHeight);
+        //RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.calendar_widget);
 
         // Установим цвет заднего фона всего виджета
-        remoteViews.setInt(R.id.calendar, "setBackgroundColor", CalendarWidgetConfigureActivity.loadBackgroundColorBackgroundColorPref(context, appWidgetId));
+        remoteViews.setInt(R.id.calendar, "setBackgroundColor", CalendarWidgetConfigureActivity.loadPrefValue(context, appWidgetId, CalendarWidgetConfigureActivity.PREF_KEY_BACKGROUND_COLOR));
 
         setCalendarDataTexts(remoteViews);
         setCalendarDataSheetClick(remoteViews, context, appWidgetId);
@@ -49,6 +111,42 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         // Передаем сообщение менеджеру виджетов, что необходимо обновить виджеты
         appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
         appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.events);
+    }
+
+    /**
+     * Determine appropriate view based on row or column provided.
+     *
+     * @param minHeight
+     * @return
+     */
+    private static RemoteViews getRemoteViews(Context context, int minHeight) {
+        // Определим количество ячеек в высоту на основании размера виджета в dp.
+        int rows = getCellsForSize(minHeight);
+        // Измени полотно в зависимости от количества ячеек в высоту
+        switch (rows) {
+            case 1:  {
+                //Toast.makeText(context, "1 в высоту.", Toast.LENGTH_SHORT).show();
+                return new RemoteViews(context.getPackageName(), R.layout.calendar_widget);
+            }
+            default: {
+                //Toast.makeText(context, "Больше 1 в высоту.", Toast.LENGTH_SHORT).show();
+                return new RemoteViews(context.getPackageName(), R.layout.calendar_widget_expanded);
+            }
+        }
+    }
+
+    /**
+     * Returns number of cells needed for given size of the widget.
+     *
+     * @param size Widget size in dp.
+     * @return Size in number of cells.
+     */
+    private static int getCellsForSize(int size) {
+        int n = 2;
+        while (70 * n - 30 < size) {
+            ++n;
+        }
+        return n - 1;
     }
 
     private static void setEventsList(RemoteViews remoteViews, Context context, int appWidgetId){
@@ -91,58 +189,6 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, new int[] { appWidgetId });
         PendingIntent updatePIntent = PendingIntent.getBroadcast(context, appWidgetId, updateIntent, 0);
         remoteViews.setOnClickPendingIntent(R.id.calendar_sheet, updatePIntent);
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        super.onReceive(context, intent);
-        // Обрабатываем нажатие на элемент списка
-        if (intent.getAction().equalsIgnoreCase(ACTION_ON_CLICK)) {
-            CalendarEvent event = intent.getParcelableExtra(EVENT);
-            if (event != null) {
-                // Откроем событие
-                Intent eventIntent = new Intent(Intent.ACTION_VIEW);
-                eventIntent.setData(ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.getId()));
-                eventIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.getStartTime());
-                eventIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.getEndTime());
-                eventIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                try {
-                    context.startActivity(eventIntent);
-                } catch (Exception e) {
-                    if (e instanceof ActivityNotFoundException) {
-                        Toast.makeText(context, R.string.calendar_activity_not_found, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Log.e(TAG, e.getMessage());
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        // На телефоне может быть установлено несколько активных виджетов, поэтому обновим их все
-        for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
-        }
-    }
-
-    @Override
-    public void onDeleted(Context context, int[] appWidgetIds) {
-        // Когда пользоатель удаляет виджет, удаим настройки, связанные с ним
-        for (int appWidgetId : appWidgetIds) {
-            CalendarWidgetConfigureActivity.deletePrefs(context, appWidgetId);
-        }
-    }
-
-    @Override
-    public void onEnabled(Context context) {
-        // Добавить функциональность при создании первого виджета
-    }
-
-    @Override
-    public void onDisabled(Context context) {
-        // Добавить функциональность после отображения последнего виджета
     }
 }
 

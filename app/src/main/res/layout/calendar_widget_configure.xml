@@ -9,7 +9,9 @@
         android:id="@+id/rl_text_size"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp" >
 
         <TextView
             android:id="@+id/txt_text_size"
@@ -25,13 +27,13 @@
 
         <EditText
             android:id="@+id/et_text_size"
-            android:layout_width="80dp"
+            android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
             android:background="@android:color/white"
-            android:inputType="numberSigned"
-            />
+            android:gravity="center_vertical|center_horizontal|center"
+            android:inputType="numberSigned" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -39,7 +41,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:paddingTop="3dp">
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp">
 
         <TextView
             android:id="@+id/txt_text_color"
@@ -64,11 +67,42 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/rl_today_text_color"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp">
+
+        <TextView
+            android:id="@+id/txt_today_text_color"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/img_today_text_color"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/img_today_text_color"
+            android:gravity="center_vertical"
+            android:text="@string/today_text_color"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/img_today_text_color"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:contentDescription="@string/today_text_color"
+            android:background="@android:color/white" />
+    </RelativeLayout>
+
+    <RelativeLayout
         android:id="@+id/rl_background_color"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:paddingTop="3dp">
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp" >
 
         <TextView
             android:id="@+id/txt_background_color"
@@ -95,7 +129,7 @@
 
     <Button
         android:id="@+id/add_upgrade_button"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/upgrade_widget" />

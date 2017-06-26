@@ -16,4 +16,5 @@
     <string name="background_color">Цвет заднего фона виджета</string>
     <string name="add_widget">Добавить виджет</string>
     <string name="event_text_size">Размер текста событий</string>
+    <string name="today_text_color">Цвет текста сегодняшнего события</string>
 </resources>
