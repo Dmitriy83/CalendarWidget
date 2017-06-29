@@ -33,6 +33,7 @@ public class CalendarWidgetConfigureActivity extends Activity {
     public static final String PREF_KEY_BACKGROUND_COLOR = "background_color";
     public static final String PREF_KEY_TEXT_SIZE = "text_size";
     public static final String PREF_KEY_TODAY_TEXT_COLOR = "today_text_color";
+    public static final String PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED = "number_of_events_displayed";
     private int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     private Context mContext;
     private final String TAG = this.getClass().getSimpleName();
@@ -43,6 +44,7 @@ public class CalendarWidgetConfigureActivity extends Activity {
         defaultValues.put(PREF_KEY_BACKGROUND_COLOR, Color.TRANSPARENT);
         defaultValues.put(PREF_KEY_TEXT_SIZE, 15);
         defaultValues.put(PREF_KEY_TODAY_TEXT_COLOR, Color.YELLOW);
+        defaultValues.put(PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED, 10);
         return  defaultValues;
     }
 
@@ -76,6 +78,7 @@ public class CalendarWidgetConfigureActivity extends Activity {
         setTextColorParamsAndListener();
         setTodayTextColorParamsAndListener();
         setBackgroundColorParamsAndListener();
+        setNumberOfEventsDisplayedParamsAndListener();
     }
 
     private void setBackgroundColorParamsAndListener() {
@@ -161,6 +164,11 @@ public class CalendarWidgetConfigureActivity extends Activity {
         etTextSize.setText(String.valueOf(loadPrefValue(this, mAppWidgetId, PREF_KEY_TEXT_SIZE)));
     }
 
+    private void setNumberOfEventsDisplayedParamsAndListener() {
+        EditText etNumberOfEvents = (EditText) findViewById(R.id.et_number_of_events_displayed);
+        etNumberOfEvents.setText(String.valueOf(loadPrefValue(this, mAppWidgetId, PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED)));
+    }
+
     private void setAddUpgradeButtonParamsAndListener() {
         Button addUpgradeButton = (Button)findViewById(R.id.add_upgrade_button);
         if (isItFirstConfiguration()){
@@ -169,6 +177,16 @@ public class CalendarWidgetConfigureActivity extends Activity {
         addUpgradeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Сохраняем количество отображаемых событий в настройках
+                EditText etNumberOfEvents = (EditText) findViewById(R.id.et_number_of_events_displayed);
+                int numberOfEvents = defaultValues.get(PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED);
+                try {
+                    numberOfEvents = Integer.parseInt(etNumberOfEvents.getText().toString());
+                }catch(Exception e){
+                    Log.e(TAG, e.toString());
+                }
+                savePrefValue(mAppWidgetId, PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED, numberOfEvents);
+
                 // Сохраняем размер текста в настройках
                 EditText etTextSize = (EditText) findViewById(R.id.et_text_size);
                 int textSize = defaultValues.get(PREF_KEY_TEXT_SIZE);

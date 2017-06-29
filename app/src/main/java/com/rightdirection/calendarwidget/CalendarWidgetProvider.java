@@ -59,8 +59,8 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
-        updateAppWidget(context, appWidgetManager, appWidgetId);
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
+        updateAppWidget(context, appWidgetManager, appWidgetId);
     }
 
     @Override
@@ -180,6 +180,12 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         }
         String month = new SimpleDateFormat("MMMM", rusDateFormatSymbols).format(currentDate);
         remoteViews.setTextViewText(R.id.calendar_month, month.toUpperCase());
+
+        // Установим значения текстовых полей для развернутого виджета
+        String fullData = new SimpleDateFormat("d MMMM yyyy", Locale.getDefault()).format(currentDate);
+        remoteViews.setTextViewText(R.id.calendar_full_data, fullData);
+        String dayOfWeek = new SimpleDateFormat("EEEE", Locale.getDefault()).format(currentDate);
+        remoteViews.setTextViewText(R.id.calendar_day_of_week, dayOfWeek);
     }
 
     private static void setCalendarDataSheetClick(RemoteViews remoteViews, Context context, int appWidgetId){

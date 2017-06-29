@@ -36,13 +36,13 @@ public class CalendarWidgetService extends RemoteViewsService {
  * Фабрика для заполнения событий календаря
  */
 class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
-    private static final int COUNT_OF_DISPLAYING_EVENTS = 10;
-    private final String TAG = this.getClass().getSimpleName();
+    //private final String TAG = this.getClass().getSimpleName();
     private ArrayList<CalendarEvent> mData;
     private final Context mContext;
     private int mWidgetID;
     private int mTextColor;
     private int mTextSize;
+    private int mNumberOfEventsDisplayed;
     private int mTodayTextColor;
 
     CalendarWidgetRemoteViewsFactory(Context context, Intent intent) {
@@ -60,6 +60,7 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
         mTextColor = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_TEXT_COLOR);
         mTextSize = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_TEXT_SIZE);
         mTodayTextColor = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_TODAY_TEXT_COLOR);
+        mNumberOfEventsDisplayed = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED);
 
         //updateTestEvents();
         updateEvents();
@@ -79,7 +80,7 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
 
         long startTimeInMillis = Calendar.getInstance().getTimeInMillis();
         Calendar endTime = Calendar.getInstance();
-        endTime.add(Calendar.MONTH, 3);
+        endTime.add(Calendar.MONTH, 12); // Считываем события за год вперед
         long entTimeInMillis = endTime.getTimeInMillis();
 
         String[] projection = new String[]{CalendarContract.Instances.BEGIN, CalendarContract.Instances.END,
@@ -102,7 +103,7 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
         mData.clear();
         if (cursor == null) return;
         int i = 1;
-        while (cursor.moveToNext() && i <= COUNT_OF_DISPLAYING_EVENTS) {
+        while (cursor.moveToNext() && i <= mNumberOfEventsDisplayed) {
             mData.add(new CalendarEvent(cursor.getLong(EVENT_START_TIME_INDEX), cursor.getLong(EVENT_END_TIME_INDEX),  cursor.getString(EVENT_TITLE_INDEX), cursor.getLong(EVENT_ID_INDEX)));
             i++;
         }

@@ -6,6 +6,37 @@
     android:padding="16dp">
 
     <RelativeLayout
+        android:id="@+id/rl_number_of_events_displayed"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp" >
+
+        <TextView
+            android:id="@+id/txt_number_of_events_displayed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/et_number_of_events_displayed"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/et_number_of_events_displayed"
+            android:gravity="center_vertical"
+            android:text="@string/number_of_events_displayed"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/et_number_of_events_displayed"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/white"
+            android:gravity="center_vertical|center_horizontal|center"
+            android:inputType="numberSigned" />
+    </RelativeLayout>
+
+    <RelativeLayout
         android:id="@+id/rl_text_size"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -123,8 +154,8 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
             android:adjustViewBounds="false"
-            android:contentDescription="@string/background_color"
-            android:background="@android:color/transparent" />
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/background_color" />
     </RelativeLayout>
 
     <Button

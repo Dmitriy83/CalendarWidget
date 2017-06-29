@@ -17,4 +17,5 @@
     <string name="add_widget">Добавить виджет</string>
     <string name="event_text_size">Размер текста событий</string>
     <string name="today_text_color">Цвет текста сегодняшнего события</string>
+    <string name="number_of_events_displayed">Количество отображаемых событий</string>
 </resources>
