@@ -8,12 +8,12 @@
         android:id="@+id/calendar_sheet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:gravity="center_vertical|center_horizontal"
         android:orientation="vertical"
-        android:weightSum="1"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true">
+        android:weightSum="1">
 
         <TextView
             android:id="@+id/calendar_month"
@@ -21,10 +21,11 @@
             android:layout_height="35dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:background="#f7212b"
+            android:background="@drawable/calendar1"
             android:contentDescription="@string/month"
             android:gravity="center_vertical|center_horizontal"
             android:minWidth="50dp"
+            android:paddingTop="5dp"
             android:text="@string/default_month"
             android:textAlignment="center"
             android:textColor="#ffffff"
@@ -38,7 +39,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/calendar_month"
-            android:background="#c1d0d6"
+            android:background="#cee0e6"
             android:contentDescription="@string/data"
             android:gravity="center_vertical|center_horizontal"
             android:text="@string/default_data"

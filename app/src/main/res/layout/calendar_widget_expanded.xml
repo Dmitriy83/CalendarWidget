@@ -18,23 +18,22 @@
         <TextView
             android:id="@+id/calendar_full_data"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#38c2f9"
+            android:layout_height="45dp"
+            android:background="@drawable/calendar2"
             android:contentDescription="@string/data"
             android:gravity="center_vertical|center_horizontal"
+            android:paddingTop="10dp"
             android:text="@string/default_data"
             android:textAlignment="center"
             android:textColor="#ffffff"
             android:textSize="22dp"
-            android:textStyle="bold"
-
-            />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/calendar_day_of_week"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#38c2f9"
+            android:background="#e66551"
             android:contentDescription="@string/month"
             android:gravity="center_vertical|center_horizontal"
             android:minWidth="50dp"
