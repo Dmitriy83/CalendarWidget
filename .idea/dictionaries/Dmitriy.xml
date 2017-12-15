@@ -2,10 +2,15 @@
   <dictionary name="Dmitriy">
     <words>
       <w>calendarwidget</w>
+      <w>datesheetonclick</w>
+      <w>eeee</w>
+      <w>genymotion</w>
       <w>itemonclick</w>
       <w>mmmm</w>
       <w>remoteviews</w>
       <w>rightdirection</w>
+      <w>settingsonclick</w>
+      <w>sharedpref</w>
     </words>
   </dictionary>
 </component>

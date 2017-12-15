@@ -23,6 +23,7 @@ public class CalendarEvent implements Parcelable{
         id = in.readLong();
     }
 
+    @SuppressWarnings("unused")
     public static final Creator<CalendarEvent> CREATOR = new Creator<CalendarEvent>() {
         @Override
         public CalendarEvent createFromParcel(Parcel in) {

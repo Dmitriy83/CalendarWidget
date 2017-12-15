@@ -1,19 +1,17 @@
 package com.rightdirection.calendarwidget;
 
-import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.CalendarContract;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -25,9 +23,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 public class CalendarWidgetProvider extends AppWidgetProvider {
 
-    private final static String ACTION_ON_CLICK = "com.rightdirection.calendarwidget.itemonclick";
+    private final static String ACTION_ITEM_ON_CLICK = "com.rightdirection.calendarwidget.itemonclick";
+    private final static String ACTION_DATE_SHEET_ON_CLICK = "com.rightdirection.calendarwidget.datesheetonclick";
+    private final static String ACTION_SETTINGS_ON_CLICK = "com.rightdirection.calendarwidget.settingsonclick";
     final static String EVENT = "event";
     private final String TAG = this.getClass().getSimpleName();
 
@@ -35,7 +38,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // На телефоне может быть установлено несколько активных виджетов, поэтому обновим их все
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
+            updateAppWidget(context, appWidgetManager, appWidgetId, appWidgetManager.getAppWidgetInfo(appWidgetId).provider.getClassName());
         }
     }
 
@@ -60,37 +63,83 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
-        updateAppWidget(context, appWidgetManager, appWidgetId);
+        updateAppWidget(context, appWidgetManager, appWidgetId, appWidgetManager.getAppWidgetInfo(appWidgetId).provider.getClassName());
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
         // Обрабатываем нажатие на элемент списка
-        if (intent.getAction().equalsIgnoreCase(ACTION_ON_CLICK)) {
-            CalendarEvent event = intent.getParcelableExtra(EVENT);
-            if (event != null) {
-                // Откроем событие
-                Intent eventIntent = new Intent(Intent.ACTION_VIEW);
-                eventIntent.setData(ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.getId()));
-                eventIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.getStartTime());
-                eventIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.getEndTime());
-                eventIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                try {
-                    context.startActivity(eventIntent);
-                } catch (Exception e) {
-                    if (e instanceof ActivityNotFoundException) {
-                        Toast.makeText(context, R.string.calendar_activity_not_found, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Log.e(TAG, e.getMessage());
-                    }
+        if (intent.getAction().equalsIgnoreCase(ACTION_ITEM_ON_CLICK)) {
+            calendarItemOnClick(context, intent);
+        }
+        // Обрабатываем нажатие на дату календаря - отобразим на короткое время кнопку настоек
+        else if (intent.getAction().equalsIgnoreCase(ACTION_DATE_SHEET_ON_CLICK)) {
+            int widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+            if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return;
+            dateSheetOnClick(context, widgetId);
+        }
+        // Обрабатываем нажатие на кнопку Настройки
+        else if (intent.getAction().equalsIgnoreCase(ACTION_SETTINGS_ON_CLICK)) {
+            int widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+            if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return;
+            Intent confIntent = new Intent(context, CalendarWidgetConfigureActivity.class);
+            confIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            confIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
+            context.startActivity(confIntent);
+        }
+    }
+
+    private void dateSheetOnClick(Context context, final int widgetId) {
+        final AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
+
+        // Отключим видимость списка
+        final RemoteViews remoteViews = getRemoteViews(context,
+                widgetManager.getAppWidgetOptions(widgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT));
+        remoteViews.setViewVisibility(R.id.events, GONE);
+        // Покажем кнопку настройки
+        remoteViews.setViewVisibility(R.id.rvSettings, VISIBLE);
+
+        // Обновим отображение виджета
+        widgetManager.updateAppWidget(widgetId, remoteViews);
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            // Событие после прошествия времени задержки
+            public void run() {
+                // Включим видимость списка, уберем кнопку Настройка
+                remoteViews.setViewVisibility(R.id.events, VISIBLE);
+                remoteViews.setViewVisibility(R.id.rvSettings, GONE);
+                widgetManager.updateAppWidget(widgetId, remoteViews);
+                widgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.events);
+            }
+        }, 1100);
+    }
+
+    private void calendarItemOnClick(Context context, Intent intent) {
+        CalendarEvent event = intent.getParcelableExtra(EVENT);
+        if (event != null) {
+            // Откроем событие
+            Intent eventIntent = new Intent(Intent.ACTION_VIEW);
+            eventIntent.setData(ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.getId()));
+            eventIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.getStartTime());
+            eventIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.getEndTime());
+            eventIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                context.startActivity(eventIntent);
+            } catch (Exception e) {
+                if (e instanceof ActivityNotFoundException) {
+                    Toast.makeText(context, R.string.calendar_activity_not_found, Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.e(TAG, e.getMessage());
                 }
             }
         }
     }
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
+                                int appWidgetId, String providerClassName) {
 
         //CharSequence widgetText = CalendarWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
         // Создаем RemoteViews объекты
@@ -104,9 +153,14 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         remoteViews.setInt(R.id.calendar, "setBackgroundColor", CalendarWidgetConfigureActivity.loadPrefValue(context, appWidgetId, CalendarWidgetConfigureActivity.PREF_KEY_BACKGROUND_COLOR));
 
         setCalendarDataTexts(remoteViews);
-        setCalendarDataSheetClick(remoteViews, context, appWidgetId);
         setEventsList(remoteViews, context, appWidgetId);
-        setEventsListClick(remoteViews, context);
+        try {
+            setCalendarDataSheetClick(remoteViews, context, appWidgetId, providerClassName);
+            setEventsListClick(remoteViews, context, providerClassName);
+            setSettingsButtonClick(remoteViews, context, appWidgetId, providerClassName);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
 
         // Передаем сообщение менеджеру виджетов, что необходимо обновить виджеты
         appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
@@ -115,9 +169,6 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
 
     /**
      * Determine appropriate view based on row or column provided.
-     *
-     * @param minHeight
-     * @return
      */
     private static RemoteViews getRemoteViews(Context context, int minHeight) {
         // Определим количество ячеек в высоту на основании размера виджета в dp.
@@ -149,7 +200,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         return n - 1;
     }
 
-    private static void setEventsList(RemoteViews remoteViews, Context context, int appWidgetId){
+    private static void setEventsList(RemoteViews remoteViews, Context context, int appWidgetId) {
         // Вызываем сервис для заполнения списка событий
         Intent intent = new Intent(context, CalendarWidgetService.class);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
@@ -159,9 +210,9 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         remoteViews.setEmptyView(R.id.events, R.id.empty_view);
     }
 
-    private static void setEventsListClick(RemoteViews remoteViews, Context context){
-        Intent listClickIntent = new Intent(context, CalendarWidgetProvider.class);
-        listClickIntent.setAction(ACTION_ON_CLICK);
+    private static void setEventsListClick(RemoteViews remoteViews, Context context, String providerClassName) throws ClassNotFoundException {
+        Intent listClickIntent = new Intent(context, getClassByName(providerClassName));
+        listClickIntent.setAction(ACTION_ITEM_ON_CLICK);
         PendingIntent listClickPIntent = PendingIntent.getBroadcast(context, 0, listClickIntent, 0);
         remoteViews.setPendingIntentTemplate(R.id.events, listClickPIntent);
     }
@@ -178,7 +229,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         }else{
             rusDateFormatSymbols.setMonths(new String[]{"jan", "feb", "mar", "apr", "may", "june", "july", "aug", "sept", "oct", "nov", "dec"});
         }
-        String month = new SimpleDateFormat("MMMM", rusDateFormatSymbols).format(currentDate);
+        @SuppressLint("SimpleDateFormat") String month = new SimpleDateFormat("MMMM", rusDateFormatSymbols).format(currentDate);
         remoteViews.setTextViewText(R.id.calendar_month, month.toUpperCase());
 
         // Установим значения текстовых полей для развернутого виджета
@@ -188,13 +239,25 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         remoteViews.setTextViewText(R.id.calendar_day_of_week, dayOfWeek);
     }
 
-    private static void setCalendarDataSheetClick(RemoteViews remoteViews, Context context, int appWidgetId){
+    private static void setCalendarDataSheetClick(RemoteViews remoteViews, Context context, int appWidgetId, String providerClassName) throws ClassNotFoundException {
         // Привяжем событие обновления виджета при клике на дате календаря
-        Intent updateIntent = new Intent(context, CalendarWidgetProvider.class);
-        updateIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, new int[] { appWidgetId });
+        Intent updateIntent = new Intent(context, getClassByName(providerClassName));
+        updateIntent.setAction(ACTION_DATE_SHEET_ON_CLICK);
+        updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         PendingIntent updatePIntent = PendingIntent.getBroadcast(context, appWidgetId, updateIntent, 0);
         remoteViews.setOnClickPendingIntent(R.id.calendar_sheet, updatePIntent);
+    }
+
+    private static Class<?> getClassByName(String providerClassName) throws ClassNotFoundException {
+        return Class.forName(providerClassName);
+    }
+
+    private static void setSettingsButtonClick(RemoteViews remoteViews, Context context, int appWidgetId, String providerClassName) throws ClassNotFoundException {
+        Intent btnSettingsClickIntent = new Intent(context, getClassByName(providerClassName));
+        btnSettingsClickIntent.setAction(ACTION_SETTINGS_ON_CLICK);
+        btnSettingsClickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        PendingIntent btnSettingsClickPIntent = PendingIntent.getBroadcast(context, appWidgetId, btnSettingsClickIntent, 0);
+        remoteViews.setOnClickPendingIntent(R.id.btnSettings, btnSettingsClickPIntent);
     }
 }
 

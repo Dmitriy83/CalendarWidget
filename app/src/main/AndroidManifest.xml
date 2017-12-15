@@ -10,25 +10,51 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        >
-        <service
-            android:name=".CalendarWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS">
-        </service>
-        <receiver android:name=".CalendarWidgetProvider">
+        android:fullBackupContent="@xml/backup_descriptor">
+
+        <receiver android:name=".CalendarWidgetProvider" android:label="@string/widget_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="android.intent.action.SCREEN_ON" />
             </intent-filter>
-
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/calendar_widget_info" />
         </receiver>
 
+        <receiver android:name=".CalendarWidgetProvider4x4" android:label="@string/widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.SCREEN_ON" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/calendar_widget_info_4x4" />
+        </receiver>
+
+        <service
+            android:name=".CalendarWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS">
+        </service>
         <activity android:name=".CalendarWidgetConfigureActivity">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with "http://www.example.com/gizmos” -->
+                <data
+                    android:host="www.right_direction.com"
+                    android:pathPrefix="/just_calendar"
+                    android:scheme="http" />
+                <!-- note that the leading "/" is required for pathPrefix -->
+                <!-- Accepts URIs that begin with "right_direction://just_buying” -->
+                <data
+                    android:host="just_calendar"
+                    android:scheme="right_direction" />
             </intent-filter>
         </activity>
     </application>

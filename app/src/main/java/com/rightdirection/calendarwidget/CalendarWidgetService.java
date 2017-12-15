@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.CalendarContract;
 import android.support.v4.app.ActivityCompat;
 import android.widget.RemoteViews;
@@ -39,7 +40,7 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
     //private final String TAG = this.getClass().getSimpleName();
     private ArrayList<CalendarEvent> mData;
     private final Context mContext;
-    private int mWidgetID;
+    private final int mWidgetID;
     private int mTextColor;
     private int mTextSize;
     private int mNumberOfEventsDisplayed;
@@ -55,6 +56,17 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
         mData = new ArrayList<>();
     }
 
+    private static boolean isEmulator() {
+        return Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk".equals(Build.PRODUCT);
+    }
+
     @Override
     public void onDataSetChanged() {
         mTextColor = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_TEXT_COLOR);
@@ -62,15 +74,70 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
         mTodayTextColor = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_TODAY_TEXT_COLOR);
         mNumberOfEventsDisplayed = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED);
 
-        //updateTestEvents();
-        updateEvents();
+        if (!isEmulator()){
+            updateEvents();
+        } else{
+            updateTestEvents();
+        }
     }
 
     private void updateTestEvents() {
         mData.clear();
-        for (int i = 1; i <= 15; i++){
+
+        ArrayList<CalendarEvent> testEvents = getTestEventsList();
+        mData.addAll(testEvents);
+        /*for (int i = 1; i <= 15; i++){
             mData.add(new CalendarEvent(Calendar.getInstance().getTimeInMillis(), Calendar.getInstance().getTimeInMillis(), " Event " + i, 1));
+        }*/
+    }
+
+    private ArrayList<CalendarEvent> getTestEventsList() {
+        ArrayList<CalendarEvent> testEvents = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MINUTE, 0);
+        if (Locale.getDefault().getLanguage().equals(new Locale("ru").getLanguage())) {
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "Позвони родителям", 1));
+            calendar.add(Calendar.DATE,1);
+            calendar.add(Calendar.HOUR,3);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "День рождения Маргарита", 1));
+            calendar.add(Calendar.DATE,5);
+            calendar.add(Calendar.HOUR,3);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "Презентация", 1));
+            calendar.add(Calendar.DATE,7);
+            calendar.add(Calendar.HOUR,3);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "Долг 10000", 1));
+            calendar.add(Calendar.DATE,15);
+            calendar.add(Calendar.HOUR,3);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "День рождения Дмитрий Александрович", 1));
+            calendar.add(Calendar.DATE,2);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "День рождения Кирилл", 1));
+            calendar.add(Calendar.DATE,12);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "День рождения Отец", 1));
+            calendar.add(Calendar.DATE,20);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "День рождения Соня", 1));
+        } else{
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "Call parents", 1));
+            calendar.add(Calendar.DATE,1);
+            calendar.add(Calendar.HOUR, 3);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "Birthday Margo", 1));
+            calendar.add(Calendar.DATE,5);
+            calendar.add(Calendar.HOUR,3);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "Presentation", 1));
+            calendar.add(Calendar.DATE,7);
+            calendar.add(Calendar.HOUR,3);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "Debt 10000", 1));
+            calendar.add(Calendar.DATE,15);
+            calendar.add(Calendar.HOUR,3);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "Birthday Dmitri", 1));
+            calendar.add(Calendar.DATE,2);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "Birthday Jim", 1));
+            calendar.add(Calendar.DATE,12);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "Birthday Dad", 1));
+            calendar.add(Calendar.DATE,20);
+            testEvents.add(new CalendarEvent(calendar.getTimeInMillis(), calendar.getTimeInMillis(), "Birthday Sofia", 1));
         }
+
+        return testEvents;
     }
 
     private void updateEvents(){

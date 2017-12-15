@@ -20,7 +20,6 @@ import com.onegravity.colorpicker.ColorPickerListener;
 import com.onegravity.colorpicker.SetColorPickerListenerEvent;
 
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Экран настроек для виджета {@link CalendarWidgetProvider CalendarWidgetProvider}.
@@ -82,10 +81,10 @@ public class CalendarWidgetConfigureActivity extends Activity {
     }
 
     private void setBackgroundColorParamsAndListener() {
-        ImageView imgBackgroundColor = (ImageView) findViewById(R.id.img_background_color);
+        ImageView imgBackgroundColor = findViewById(R.id.img_background_color);
         imgBackgroundColor.setBackgroundColor(loadPrefValue(this, mAppWidgetId, PREF_KEY_BACKGROUND_COLOR));
         imgBackgroundColor.invalidate();
-        RelativeLayout rlBackgroundColor = (RelativeLayout) findViewById(R.id.rl_background_color);
+        RelativeLayout rlBackgroundColor = findViewById(R.id.rl_background_color);
         rlBackgroundColor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,7 +97,7 @@ public class CalendarWidgetConfigureActivity extends Activity {
                     }
                     @Override
                     public void onColorChanged(int color) {
-                        ImageView imgBackgroundColor = (ImageView) findViewById(R.id.img_background_color);
+                        ImageView imgBackgroundColor = findViewById(R.id.img_background_color);
                         imgBackgroundColor.setBackgroundColor(color);
                         imgBackgroundColor.invalidate();
                     }
@@ -108,10 +107,10 @@ public class CalendarWidgetConfigureActivity extends Activity {
     }
 
     private void setTextColorParamsAndListener() {
-        ImageView imgTextColor = (ImageView) findViewById(R.id.img_text_color);
+        ImageView imgTextColor = findViewById(R.id.img_text_color);
         imgTextColor.setBackgroundColor(loadPrefValue(mContext, mAppWidgetId, PREF_KEY_TEXT_COLOR));
         imgTextColor.invalidate();
-        RelativeLayout rlTextColor = (RelativeLayout) findViewById(R.id.rl_text_color);
+        RelativeLayout rlTextColor = findViewById(R.id.rl_text_color);
         rlTextColor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,7 +123,7 @@ public class CalendarWidgetConfigureActivity extends Activity {
                     }
                     @Override
                     public void onColorChanged(int color) {
-                        ImageView imgTextColor = (ImageView) findViewById(R.id.img_text_color);
+                        ImageView imgTextColor = findViewById(R.id.img_text_color);
                         imgTextColor.setBackgroundColor(color);
                         imgTextColor.invalidate();
                     }
@@ -134,10 +133,10 @@ public class CalendarWidgetConfigureActivity extends Activity {
     }
 
     private void setTodayTextColorParamsAndListener() {
-        ImageView imgTodayTextColor = (ImageView) findViewById(R.id.img_today_text_color);
+        ImageView imgTodayTextColor = findViewById(R.id.img_today_text_color);
         imgTodayTextColor.setBackgroundColor(loadPrefValue(mContext, mAppWidgetId, PREF_KEY_TODAY_TEXT_COLOR));
         imgTodayTextColor.invalidate();
-        RelativeLayout rlTodayTextColor = (RelativeLayout) findViewById(R.id.rl_today_text_color);
+        RelativeLayout rlTodayTextColor = findViewById(R.id.rl_today_text_color);
         rlTodayTextColor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -150,7 +149,7 @@ public class CalendarWidgetConfigureActivity extends Activity {
                     }
                     @Override
                     public void onColorChanged(int color) {
-                        ImageView imgTodayTextColor = (ImageView) findViewById(R.id.img_today_text_color);
+                        ImageView imgTodayTextColor = findViewById(R.id.img_today_text_color);
                         imgTodayTextColor.setBackgroundColor(color);
                         imgTodayTextColor.invalidate();
                     }
@@ -160,69 +159,79 @@ public class CalendarWidgetConfigureActivity extends Activity {
     }
 
     private void setTextSizeParamsAndListener() {
-        EditText etTextSize = (EditText) findViewById(R.id.et_text_size);
+        EditText etTextSize = findViewById(R.id.et_text_size);
         etTextSize.setText(String.valueOf(loadPrefValue(this, mAppWidgetId, PREF_KEY_TEXT_SIZE)));
     }
 
     private void setNumberOfEventsDisplayedParamsAndListener() {
-        EditText etNumberOfEvents = (EditText) findViewById(R.id.et_number_of_events_displayed);
+        EditText etNumberOfEvents = findViewById(R.id.et_number_of_events_displayed);
         etNumberOfEvents.setText(String.valueOf(loadPrefValue(this, mAppWidgetId, PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED)));
     }
 
     private void setAddUpgradeButtonParamsAndListener() {
-        Button addUpgradeButton = (Button)findViewById(R.id.add_upgrade_button);
+        Button addUpgradeButton = findViewById(R.id.add_upgrade_button);
         if (isItFirstConfiguration()){
             addUpgradeButton.setText(getString(R.string.add_widget));
         }
         addUpgradeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Сохраняем количество отображаемых событий в настройках
-                EditText etNumberOfEvents = (EditText) findViewById(R.id.et_number_of_events_displayed);
-                int numberOfEvents = defaultValues.get(PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED);
-                try {
-                    numberOfEvents = Integer.parseInt(etNumberOfEvents.getText().toString());
-                }catch(Exception e){
-                    Log.e(TAG, e.toString());
-                }
-                savePrefValue(mAppWidgetId, PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED, numberOfEvents);
+                addUpgradeButtonOnClick();
 
-                // Сохраняем размер текста в настройках
-                EditText etTextSize = (EditText) findViewById(R.id.et_text_size);
-                int textSize = defaultValues.get(PREF_KEY_TEXT_SIZE);
-                try {
-                    textSize = Integer.parseInt(etTextSize.getText().toString());
-                }catch(Exception e){
-                    Log.e(TAG, e.toString());
-                }
-                savePrefValue(mAppWidgetId, PREF_KEY_TEXT_SIZE, textSize);
-
-                // Сохраняем цвет текста в настройках
-                ImageView imgTextColor = (ImageView) findViewById(R.id.img_text_color);
-                ColorDrawable textColorDrawable = (ColorDrawable) imgTextColor.getBackground();
-                if (textColorDrawable != null) savePrefValue(mAppWidgetId, PREF_KEY_TEXT_COLOR, textColorDrawable.getColor());
-
-                // Сохраняем цвет текста события сегодняшнего дня в настройках
-                ImageView imgTodayTextColor = (ImageView) findViewById(R.id.img_today_text_color);
-                ColorDrawable todayTextColorDrawable = (ColorDrawable) imgTodayTextColor.getBackground();
-                if (todayTextColorDrawable != null) savePrefValue(mAppWidgetId, PREF_KEY_TODAY_TEXT_COLOR, todayTextColorDrawable.getColor());
-
-                // Сохраняем цвет фона в настройках
-                ImageView imgBackgroundColor = (ImageView) findViewById(R.id.img_background_color);
-                ColorDrawable backgroundColorDrawable = (ColorDrawable) imgBackgroundColor.getBackground();
-                if (backgroundColorDrawable != null) savePrefValue(mAppWidgetId, PREF_KEY_BACKGROUND_COLOR, backgroundColorDrawable.getColor());
-
-                // В зону ответственности активности настроек входит обновление виджета на экране
-                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
-                CalendarWidgetProvider.updateAppWidget(mContext, appWidgetManager, mAppWidgetId);
-
-                // Обязательно возвращаем виджет id
-                Intent resultValue = new Intent();
-                resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-                setResult(RESULT_OK, resultValue);
-                finish();
             }
         });
+    }
+
+    private void addUpgradeButtonOnClick() {
+        // Сохраняем количество отображаемых событий в настройках
+        EditText etNumberOfEvents = findViewById(R.id.et_number_of_events_displayed);
+        int numberOfEvents = defaultValues.get(PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED);
+        try {
+            numberOfEvents = Integer.parseInt(etNumberOfEvents.getText().toString());
+        }catch(Exception e){
+            Log.e(TAG, e.toString());
+        }
+        savePrefValue(mAppWidgetId, PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED, numberOfEvents);
+
+        // Сохраняем размер текста в настройках
+        EditText etTextSize = findViewById(R.id.et_text_size);
+        int textSize = defaultValues.get(PREF_KEY_TEXT_SIZE);
+        try {
+            textSize = Integer.parseInt(etTextSize.getText().toString());
+        }catch(Exception e){
+            Log.e(TAG, e.toString());
+        }
+        savePrefValue(mAppWidgetId, PREF_KEY_TEXT_SIZE, textSize);
+
+        // Сохраняем цвет текста в настройках
+        ImageView imgTextColor = findViewById(R.id.img_text_color);
+        ColorDrawable textColorDrawable = (ColorDrawable) imgTextColor.getBackground();
+        if (textColorDrawable != null) savePrefValue(mAppWidgetId, PREF_KEY_TEXT_COLOR, textColorDrawable.getColor());
+
+        // Сохраняем цвет текста события сегодняшнего дня в настройках
+        ImageView imgTodayTextColor = findViewById(R.id.img_today_text_color);
+        ColorDrawable todayTextColorDrawable = (ColorDrawable) imgTodayTextColor.getBackground();
+        if (todayTextColorDrawable != null) savePrefValue(mAppWidgetId, PREF_KEY_TODAY_TEXT_COLOR, todayTextColorDrawable.getColor());
+
+        // Сохраняем цвет фона в настройках
+        ImageView imgBackgroundColor = findViewById(R.id.img_background_color);
+        ColorDrawable backgroundColorDrawable = (ColorDrawable) imgBackgroundColor.getBackground();
+        if (backgroundColorDrawable != null) savePrefValue(mAppWidgetId, PREF_KEY_BACKGROUND_COLOR, backgroundColorDrawable.getColor());
+
+        // В зону ответственности активности настроек входит обновление виджета на экране
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
+        String providerClassName = appWidgetManager.getAppWidgetInfo(mAppWidgetId).provider.getClassName();
+        if (providerClassName.equals(CalendarWidgetProvider.class.getName())) {
+            CalendarWidgetProvider.updateAppWidget(mContext, appWidgetManager, mAppWidgetId, providerClassName);
+        } else{
+            CalendarWidgetProvider4x4.updateAppWidget(mContext, appWidgetManager, mAppWidgetId, providerClassName);
+        }
+
+        // Обязательно возвращаем виджет id
+        Intent resultValue = new Intent();
+        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+        setResult(RESULT_OK, resultValue);
+        finish();
     }
 
     static void deletePrefs(Context context, int appWidgetId) {

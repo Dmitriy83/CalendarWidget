@@ -30,7 +30,8 @@
             android:textAlignment="center"
             android:textColor="#ffffff"
             android:textSize="19dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:ignore="SpUsage" />
 
         <TextView
             android:id="@+id/calendar_data"
@@ -39,14 +40,15 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/calendar_month"
-            android:background="#cee0e6"
+            android:background="#addae9"
             android:contentDescription="@string/data"
             android:gravity="center_vertical|center_horizontal"
             android:text="@string/default_data"
             android:textAlignment="center"
             android:textColor="#ffffff"
             android:textSize="32dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:ignore="SpUsage" />
     </RelativeLayout>
 
     <TextView
@@ -60,6 +62,26 @@
         android:text="@string/no_events"
         android:textSize="20sp"
         android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/rvSettings"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/events"
+        android:layout_toEndOf="@+id/calendar_sheet"
+        android:gravity="center_vertical|center_horizontal"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btnSettings"
+            style="@style/Widget.AppCompat.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_settings_shape"
+            android:text="@string/settings"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
 
     <ListView
         android:id="@+id/events"

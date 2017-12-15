@@ -6,7 +6,6 @@
     android:padding="16dp">
 
     <RelativeLayout
-        android:id="@+id/rl_number_of_events_displayed"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
@@ -14,7 +13,6 @@
         android:paddingBottom="5dp" >
 
         <TextView
-            android:id="@+id/txt_number_of_events_displayed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/et_number_of_events_displayed"
@@ -27,6 +25,7 @@
 
         <EditText
             android:id="@+id/et_number_of_events_displayed"
+            android:hint="@string/_5"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentEnd="true"
@@ -37,7 +36,6 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/rl_text_size"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
@@ -45,7 +43,6 @@
         android:paddingBottom="5dp" >
 
         <TextView
-            android:id="@+id/txt_text_size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/et_text_size"
@@ -58,6 +55,7 @@
 
         <EditText
             android:id="@+id/et_text_size"
+            android:hint="@string/_15"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentEnd="true"
@@ -76,7 +74,6 @@
         android:paddingBottom="5dp">
 
         <TextView
-            android:id="@+id/txt_text_color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/img_text_color"
@@ -106,7 +103,6 @@
         android:paddingBottom="5dp">
 
         <TextView
-            android:id="@+id/txt_today_text_color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/img_today_text_color"
@@ -136,7 +132,6 @@
         android:paddingBottom="5dp" >
 
         <TextView
-            android:id="@+id/txt_background_color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/img_background_color"

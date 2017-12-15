@@ -3,7 +3,6 @@
     <string name="app_name">CalendarWidget</string>
     <string name="upgrade_widget">Обновить виджет</string>
     <string name="appwidget_text">Пример</string>
-    <string name="configure">Настройка</string>
     <string name="no_events">Нет событий календаря</string>
     <string name="month">Месяц</string>
     <string name="default_month">Янв</string>
@@ -18,4 +17,6 @@
     <string name="event_text_size">Размер текста событий</string>
     <string name="today_text_color">Цвет текста сегодняшнего события</string>
     <string name="number_of_events_displayed">Количество отображаемых событий</string>
+    <string name="widget_name">Просто календарь</string>
+    <string name="settings">Настройки</string>
 </resources>
