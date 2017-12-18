@@ -38,7 +38,13 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // На телефоне может быть установлено несколько активных виджетов, поэтому обновим их все
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, appWidgetManager.getAppWidgetInfo(appWidgetId).provider.getClassName());
+            String className;
+            if (appWidgetManager != null && appWidgetManager.getAppWidgetInfo(appWidgetId) != null && appWidgetManager.getAppWidgetInfo(appWidgetId).provider != null){
+                className = appWidgetManager.getAppWidgetInfo(appWidgetId).provider.getClassName();
+            }else{
+                continue;
+            }
+            updateAppWidget(context, appWidgetManager, appWidgetId, className);
         }
     }
 
@@ -63,7 +69,13 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
-        updateAppWidget(context, appWidgetManager, appWidgetId, appWidgetManager.getAppWidgetInfo(appWidgetId).provider.getClassName());
+        String className;
+        if (appWidgetManager != null && appWidgetManager.getAppWidgetInfo(appWidgetId) != null && appWidgetManager.getAppWidgetInfo(appWidgetId).provider != null){
+            className = appWidgetManager.getAppWidgetInfo(appWidgetId).provider.getClassName();
+        }else{
+            return;
+        }
+        updateAppWidget(context, appWidgetManager, appWidgetId, className);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -95,8 +107,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         final AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
 
         // Отключим видимость списка
-        final RemoteViews remoteViews = getRemoteViews(context,
-                widgetManager.getAppWidgetOptions(widgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT));
+        final RemoteViews remoteViews = getRemoteViews(context,  widgetId);
         remoteViews.setViewVisibility(R.id.events, GONE);
         // Покажем кнопку настройки
         remoteViews.setViewVisibility(R.id.rvSettings, VISIBLE);
@@ -144,9 +155,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         //CharSequence widgetText = CalendarWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
         // Создаем RemoteViews объекты
         // Получим минимальную высоту виджета
-        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
-        int minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
-        RemoteViews remoteViews = getRemoteViews(context, minHeight);
+        RemoteViews remoteViews = getRemoteViews(context, appWidgetId);
         //RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.calendar_widget);
 
         // Установим цвет заднего фона всего виджета
@@ -170,19 +179,27 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     /**
      * Determine appropriate view based on row or column provided.
      */
-    private static RemoteViews getRemoteViews(Context context, int minHeight) {
+    private static RemoteViews getRemoteViews(Context context, final int widgetId) {
         // Определим количество ячеек в высоту на основании размера виджета в dp.
-        int rows = getCellsForSize(minHeight);
+        //int rows = getCellsForSize(minHeight);
         // Измени полотно в зависимости от количества ячеек в высоту
-        switch (rows) {
+        /*switch (rows) {
             case 1:  {
-                //Toast.makeText(context, "1 в высоту.", Toast.LENGTH_SHORT).show();
                 return new RemoteViews(context.getPackageName(), R.layout.calendar_widget);
             }
             default: {
-                //Toast.makeText(context, "Больше 1 в высоту.", Toast.LENGTH_SHORT).show();
                 return new RemoteViews(context.getPackageName(), R.layout.calendar_widget_expanded);
             }
+        }*/
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        String providerClassName = "";
+        if (appWidgetManager != null && appWidgetManager.getAppWidgetInfo(widgetId) != null && appWidgetManager.getAppWidgetInfo(widgetId).provider != null){
+            providerClassName = appWidgetManager.getAppWidgetInfo(widgetId).provider.getClassName();
+        }
+        if (providerClassName.equals(CalendarWidgetProvider4x4.class.getName())) {
+            return new RemoteViews(context.getPackageName(), R.layout.calendar_widget_expanded);
+        } else{
+            return new RemoteViews(context.getPackageName(), R.layout.calendar_widget);
         }
     }
 
@@ -192,6 +209,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
      * @param size Widget size in dp.
      * @return Size in number of cells.
      */
+    @SuppressWarnings("unused")
     private static int getCellsForSize(int size) {
         int n = 2;
         while (70 * n - 30 < size) {

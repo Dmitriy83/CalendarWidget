@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.CalendarContract;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
@@ -38,7 +37,7 @@ public class CalendarWidgetService extends RemoteViewsService {
  * Фабрика для заполнения событий календаря
  */
 class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
-    private final String TAG = this.getClass().getSimpleName();
+    //private final String TAG = this.getClass().getSimpleName();
     private ArrayList<CalendarEvent> mData;
     private final Context mContext;
     private final int mWidgetID;
