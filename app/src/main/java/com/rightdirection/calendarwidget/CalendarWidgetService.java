@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.CalendarContract;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
@@ -37,7 +38,7 @@ public class CalendarWidgetService extends RemoteViewsService {
  * Фабрика для заполнения событий календаря
  */
 class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
-    //private final String TAG = this.getClass().getSimpleName();
+    private final String TAG = this.getClass().getSimpleName();
     private ArrayList<CalendarEvent> mData;
     private final Context mContext;
     private final int mWidgetID;
@@ -83,12 +84,8 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
 
     private void updateTestEvents() {
         mData.clear();
-
         ArrayList<CalendarEvent> testEvents = getTestEventsList();
         mData.addAll(testEvents);
-        /*for (int i = 1; i <= 15; i++){
-            mData.add(new CalendarEvent(Calendar.getInstance().getTimeInMillis(), Calendar.getInstance().getTimeInMillis(), " Event " + i, 1));
-        }*/
     }
 
     private ArrayList<CalendarEvent> getTestEventsList() {
@@ -140,7 +137,7 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
         return testEvents;
     }
 
-    private void updateEvents(){
+    private void updateEvents() {
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             return;
         }

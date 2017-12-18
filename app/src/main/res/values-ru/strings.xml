@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">CalendarWidget</string>
+    <string name="app_name">Просто мини календарь</string>
     <string name="upgrade_widget">Обновить виджет</string>
     <string name="appwidget_text">Пример</string>
     <string name="no_events">Нет событий календаря</string>
@@ -17,6 +17,9 @@
     <string name="event_text_size">Размер текста событий</string>
     <string name="today_text_color">Цвет текста сегодняшнего события</string>
     <string name="number_of_events_displayed">Количество отображаемых событий</string>
-    <string name="widget_name">Просто календарь</string>
+    <string name="widget_name">Просто мини календарь</string>
     <string name="settings">Настройки</string>
+    <string name="on_permissions_denied_msg">События календаря не будут отображаться.</string>
+    <string name="read_calendar_rationale">Для отображения событий необходимо разрешение на чтение календаря.</string>
+    <string name="on_permissions_denied_permanently_msg">Вы отказали в разрешении с опцией "Больше не спрашивать". События календаря не будут отображаться. Переустановите приложение.</string>
 </resources>

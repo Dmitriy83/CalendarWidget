@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CalendarWidget</string>
+    <string name="app_name">Just mini calendar</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="upgrade_widget">Upgrade widget</string>
     <string name="no_events">There are no any events</string>
@@ -16,8 +16,11 @@
     <string name="event_text_size">Event text size</string>
     <string name="today_text_color">Text color of today\'s event</string>
     <string name="number_of_events_displayed">Number of events displayed</string>
-    <string name="widget_name">Just calendar</string>
+    <string name="widget_name">Just mini calendar</string>
     <string name="settings">Settings</string>
     <string name="_5" translatable="false">5</string>
     <string name="_15" translatable="false">15</string>
+    <string name="on_permissions_denied_msg">Events will not be shown.</string>
+    <string name="read_calendar_rationale">Read calendar permission is needed to show events.</string>
+    <string name="on_permissions_denied_permanently_msg">You denied permissions with option "NEVER ASK AGAIN". Events will not be shown. Reinstall app.</string>
 </resources>

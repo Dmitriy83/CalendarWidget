@@ -1,30 +1,38 @@
 package com.rightdirection.calendarwidget;
 
+import android.*;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.onegravity.colorpicker.ColorPickerDialog;
 import com.onegravity.colorpicker.ColorPickerListener;
 import com.onegravity.colorpicker.SetColorPickerListenerEvent;
 
 import java.util.HashMap;
+import java.util.List;
+
+import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * Экран настроек для виджета {@link CalendarWidgetProvider CalendarWidgetProvider}.
  */
-public class CalendarWidgetConfigureActivity extends Activity {
+public class CalendarWidgetConfigureActivity extends Activity implements EasyPermissions.PermissionCallbacks {
 
     private static final String PREFS_NAME = "com.rightdirection.calendarwidget.CalendarWidgetProvider";
     private static final String PREF_PREFIX_KEY = "appwidget_";
@@ -33,6 +41,7 @@ public class CalendarWidgetConfigureActivity extends Activity {
     public static final String PREF_KEY_TEXT_SIZE = "text_size";
     public static final String PREF_KEY_TODAY_TEXT_COLOR = "today_text_color";
     public static final String PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED = "number_of_events_displayed";
+    private static final int REQUEST_READ_CALENDAR = 297;
     private int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     private Context mContext;
     private final String TAG = this.getClass().getSimpleName();
@@ -78,6 +87,18 @@ public class CalendarWidgetConfigureActivity extends Activity {
         setTodayTextColorParamsAndListener();
         setBackgroundColorParamsAndListener();
         setNumberOfEventsDisplayedParamsAndListener();
+
+        // Проверим/запросим разрешения
+        requestCalendarPermissions();
+    }
+
+    private void requestCalendarPermissions(){
+        String[] perms = {android.Manifest.permission.READ_CALENDAR};
+        if (!EasyPermissions.hasPermissions(this, perms)) {
+            // Получим разрешения
+            EasyPermissions.requestPermissions(this, getString(R.string.read_calendar_rationale),
+                    REQUEST_READ_CALENDAR, perms);
+        }
     }
 
     private void setBackgroundColorParamsAndListener() {
@@ -257,6 +278,32 @@ public class CalendarWidgetConfigureActivity extends Activity {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         int defaultValue = defaultValues.get(prefName);
         return prefs.getInt(PREF_PREFIX_KEY + appWidgetId + prefName, defaultValue);
+    }
+
+    @Override
+    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
+        // Ничего не делаем
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+        // Выводим сообщение, что события календаря не будут отображаться
+        if (requestCode == REQUEST_READ_CALENDAR){
+            if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+                // Пользователь отклонил разрешения с опцией "БОЛЬШЕ НЕ СПРАШИВАТЬ."
+                Toast.makeText(this, R.string.on_permissions_denied_permanently_msg, Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(this, R.string.on_permissions_denied_msg, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Передадим обработку результов в EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 }
 
