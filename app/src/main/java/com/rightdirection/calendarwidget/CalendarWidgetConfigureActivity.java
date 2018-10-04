@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -41,16 +42,16 @@ public class CalendarWidgetConfigureActivity extends Activity implements EasyPer
     public static final String PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED = "number_of_events_displayed";
     public static final String PREF_KEY_IS_SHOW_CALENDAR_PAGE = "is_show_calendar_page";
 
-    public static final String PREF_KEY_MONTH_TEXT_SIZE = "month_text_size";
-    public static final String PREF_KEY_MONTH_TEXT_COLOR = "month_text_color";
-    public static final String PREF_KEY_DATE_TEXT_SIZE = "date_text_size";
-    public static final String PREF_KEY_DATE_TEXT_COLOR = "date_text_color";
-    public static final String PREF_KEY_DATE_BACKGROUND_COLOR = "date_background_color";
-    public static final String PREF_KEY_MONTH_TEXT_SIZE_4X4 = "month_text_size_4x4";
-    public static final String PREF_KEY_MONTH_TEXT_COLOR_4X4 = "month_text_color_4x4";
-    public static final String PREF_KEY_DATE_TEXT_SIZE_4X4 = "date_text_size_4x4";
-    public static final String PREF_KEY_DATE_TEXT_COLOR_4X4 = "date_text_color_4x4";
-    public static final String PREF_KEY_DATE_BACKGROUND_COLOR_4X4 = "date_background_color_4x4";
+    private static final String PREF_KEY_MONTH_TEXT_SIZE = "month_text_size";
+    private static final String PREF_KEY_MONTH_TEXT_COLOR = "month_text_color";
+    private static final String PREF_KEY_DATE_TEXT_SIZE = "date_text_size";
+    private static final String PREF_KEY_DATE_TEXT_COLOR = "date_text_color";
+    private static final String PREF_KEY_DATE_BACKGROUND_COLOR = "date_background_color";
+    private static final String PREF_KEY_MONTH_TEXT_SIZE_4X4 = "month_text_size_4x4";
+    private static final String PREF_KEY_MONTH_TEXT_COLOR_4X4 = "month_text_color_4x4";
+    private static final String PREF_KEY_DATE_TEXT_SIZE_4X4 = "date_text_size_4x4";
+    private static final String PREF_KEY_DATE_TEXT_COLOR_4X4 = "date_text_color_4x4";
+    private static final String PREF_KEY_DATE_BACKGROUND_COLOR_4X4 = "date_background_color_4x4";
 
     private static final int REQUEST_READ_CALENDAR = 297;
     private int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
@@ -70,7 +71,7 @@ public class CalendarWidgetConfigureActivity extends Activity implements EasyPer
         return  defaultValues;
     }
 
-    public static void addAdditionalDefaultValues(HashMap<String,Integer> defaultValues){
+    private static void addAdditionalDefaultValues(HashMap<String, Integer> defaultValues){
         defaultValues.put(PREF_KEY_MONTH_TEXT_SIZE, 19);
         defaultValues.put(PREF_KEY_MONTH_TEXT_COLOR, Color.parseColor("#ffffff"));
         defaultValues.put(PREF_KEY_DATE_TEXT_SIZE, 32);
@@ -109,7 +110,6 @@ public class CalendarWidgetConfigureActivity extends Activity implements EasyPer
         // Наполняем экран из layout
         setContentView(R.layout.calendar_widget_configure);
 
-        setAddUpgradeButtonParamsAndListener();
         setEventTextSizeParamsAndListener();
         setTextColorParamsAndListener();
         setTodayTextColorParamsAndListener();
@@ -121,6 +121,7 @@ public class CalendarWidgetConfigureActivity extends Activity implements EasyPer
         setDateTextSizeParamsAndListener();
         setDateTextColorParamsAndListener();
         setDateBackgroundColorParamsAndListener();
+        setAddUpgradeButtonParamsAndListener();
 
         // Проверим/запросим разрешения
         requestCalendarPermissions();
@@ -257,6 +258,19 @@ public class CalendarWidgetConfigureActivity extends Activity implements EasyPer
     private void setIsShowCalendarSheetParamsAndListener() {
         CheckBox cbxIsShowCalendarSheet = findViewById(R.id.cbx_is_show_calendar_sheet);
         cbxIsShowCalendarSheet.setChecked(loadPrefValue(this, mAppWidgetId, PREF_KEY_IS_SHOW_CALENDAR_PAGE) != 0);
+        setCalendarSheetSettingsVisibility();
+        cbxIsShowCalendarSheet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setCalendarSheetSettingsVisibility();
+            }
+        });
+    }
+
+    private void setCalendarSheetSettingsVisibility(){
+        LinearLayout llCalendarSheetSettings = findViewById(R.id.ll_calendar_sheet_settings);
+        CheckBox cbxIsShowCalendarSheet = findViewById(R.id.cbx_is_show_calendar_sheet);
+        llCalendarSheetSettings.setVisibility(cbxIsShowCalendarSheet.isChecked() ? View.VISIBLE : View.GONE);
     }
 
     private void requestCalendarPermissions(){
@@ -368,6 +382,9 @@ public class CalendarWidgetConfigureActivity extends Activity implements EasyPer
 
             }
         });
+        addUpgradeButton.setFocusable(true);
+        addUpgradeButton.setFocusableInTouchMode(true);
+        addUpgradeButton.requestFocus(); // по умолчанию передаем фокус на кнопку
     }
 
     private void addUpgradeButtonOnClick() {
