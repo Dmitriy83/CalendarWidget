@@ -45,6 +45,17 @@
             android:textStyle="bold"
             tools:ignore="SpUsage" />
 
+        <LinearLayout
+            android:id="@+id/calendar_sheet_settings"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:orientation="vertical"
+            android:weightSum="1"
+            android:background="@android:color/background_light"
+            android:visibility="gone">
+        </LinearLayout>
+
     </LinearLayout>
 
     <TextView

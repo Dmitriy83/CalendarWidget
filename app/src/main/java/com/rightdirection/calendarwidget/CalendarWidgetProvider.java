@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import static android.util.TypedValue.COMPLEX_UNIT_SP;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -161,7 +162,23 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         // Установим цвет заднего фона всего виджета
         remoteViews.setInt(R.id.calendar, "setBackgroundColor", CalendarWidgetConfigureActivity.loadPrefValue(context, appWidgetId, CalendarWidgetConfigureActivity.PREF_KEY_BACKGROUND_COLOR));
 
-        setCalendarDataTexts(remoteViews);
+        // Скроем страничку календаря при необходимости
+        if (CalendarWidgetConfigureActivity.loadPrefValue(context, appWidgetId, CalendarWidgetConfigureActivity.PREF_KEY_IS_SHOW_CALENDAR_PAGE) == 0) {
+            remoteViews.setViewVisibility(R.id.calendar_month, GONE);
+            remoteViews.setViewVisibility(R.id.calendar_date, GONE);
+            remoteViews.setViewVisibility(R.id.calendar_full_data, GONE);
+            remoteViews.setViewVisibility(R.id.calendar_day_of_week, GONE);
+            remoteViews.setViewVisibility(R.id.calendar_sheet_settings, VISIBLE);
+        } else{
+            remoteViews.setViewVisibility(R.id.calendar_month, VISIBLE);
+            remoteViews.setViewVisibility(R.id.calendar_date, VISIBLE);
+            remoteViews.setViewVisibility(R.id.calendar_full_data, VISIBLE);
+            remoteViews.setViewVisibility(R.id.calendar_day_of_week, VISIBLE);
+            remoteViews.setViewVisibility(R.id.calendar_sheet_settings, GONE);
+        }
+
+        setCalendarDataTexts(remoteViews, context, appWidgetId);
+
         setEventsList(remoteViews, context, appWidgetId);
         try {
             setCalendarDataSheetClick(remoteViews, context, appWidgetId, providerClassName);
@@ -191,16 +208,20 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
                 return new RemoteViews(context.getPackageName(), R.layout.calendar_widget_expanded);
             }
         }*/
+        if (isCalendarWidgetExpanded(context, widgetId)) {
+            return new RemoteViews(context.getPackageName(), R.layout.calendar_widget_expanded);
+        } else{
+            return new RemoteViews(context.getPackageName(), R.layout.calendar_widget);
+        }
+    }
+
+    static boolean isCalendarWidgetExpanded(Context context, int widgetId) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         String providerClassName = "";
         if (appWidgetManager != null && appWidgetManager.getAppWidgetInfo(widgetId) != null && appWidgetManager.getAppWidgetInfo(widgetId).provider != null){
             providerClassName = appWidgetManager.getAppWidgetInfo(widgetId).provider.getClassName();
         }
-        if (providerClassName.equals(CalendarWidgetProvider4x4.class.getName())) {
-            return new RemoteViews(context.getPackageName(), R.layout.calendar_widget_expanded);
-        } else{
-            return new RemoteViews(context.getPackageName(), R.layout.calendar_widget);
-        }
+        return providerClassName.equals(CalendarWidgetProvider4x4.class.getName());
     }
 
     /**
@@ -235,11 +256,11 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         remoteViews.setPendingIntentTemplate(R.id.events, listClickPIntent);
     }
 
-    private static void setCalendarDataTexts(RemoteViews remoteViews) {
+    private static void setCalendarDataTexts(RemoteViews remoteViews, Context context, int appWidgetId) {
         Date currentDate = new Date(System.currentTimeMillis());
         // Устанавливаем тексты даты календаря
         String data = new SimpleDateFormat("d", Locale.getDefault()).format(currentDate);
-        remoteViews.setTextViewText(R.id.calendar_data, data);
+        remoteViews.setTextViewText(R.id.calendar_date, data);
 
         DateFormatSymbols rusDateFormatSymbols = new DateFormatSymbols();
         if (Locale.getDefault().getLanguage().equals(new Locale("ru").getLanguage())) {
@@ -255,6 +276,27 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         remoteViews.setTextViewText(R.id.calendar_full_data, fullData);
         String dayOfWeek = new SimpleDateFormat("EEEE", Locale.getDefault()).format(currentDate);
         remoteViews.setTextViewText(R.id.calendar_day_of_week, dayOfWeek);
+
+        // Установим размеры текстов и цвета
+        int monthId;
+        int dateId;
+        if (CalendarWidgetProvider.isCalendarWidgetExpanded(context, appWidgetId)) {
+            monthId = R.id.calendar_full_data;
+            dateId = R.id.calendar_day_of_week;
+        }else {
+            monthId = R.id.calendar_month;
+            dateId = R.id.calendar_date;
+        }
+        remoteViews.setTextViewTextSize(monthId, COMPLEX_UNIT_SP,
+                CalendarWidgetConfigureActivity.loadPrefValue(context, appWidgetId, CalendarWidgetConfigureActivity.getPrefKeyMonthTextSize(context, appWidgetId)));
+        remoteViews.setTextColor(monthId,
+                CalendarWidgetConfigureActivity.loadPrefValue(context, appWidgetId, CalendarWidgetConfigureActivity.getPrefKeyMonthTextColor(context, appWidgetId)));
+        remoteViews.setTextViewTextSize(dateId, COMPLEX_UNIT_SP,
+                CalendarWidgetConfigureActivity.loadPrefValue(context, appWidgetId, CalendarWidgetConfigureActivity.getPrefKeyDateTextSize(context, appWidgetId)));
+        remoteViews.setTextColor(dateId,
+                CalendarWidgetConfigureActivity.loadPrefValue(context, appWidgetId, CalendarWidgetConfigureActivity.getPrefKeyDateTextColor(context, appWidgetId)));
+        remoteViews.setInt(dateId, "setBackgroundColor",
+                CalendarWidgetConfigureActivity.loadPrefValue(context, appWidgetId, CalendarWidgetConfigureActivity.getPrefKeyDateBackgroundColor(context, appWidgetId)));
     }
 
     private static void setCalendarDataSheetClick(RemoteViews remoteViews, Context context, int appWidgetId, String providerClassName) throws ClassNotFoundException {

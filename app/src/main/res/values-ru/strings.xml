@@ -11,8 +11,8 @@
     <string name="today">Сегодня</string>
     <string name="tomorrow">Завтра</string>
     <string name="calendar_activity_not_found">Приложение календаря не найдено.</string>
-    <string name="text_color">Цвет текста</string>
-    <string name="background_color">Цвет заднего фона виджета</string>
+    <string name="future_event_text_color">Цвет текста будущих событий</string>
+    <string name="events_background_color">Цвет заднего фона списка событий</string>
     <string name="add_widget">Добавить виджет</string>
     <string name="event_text_size">Размер текста событий</string>
     <string name="today_text_color">Цвет текста сегодняшнего события</string>
@@ -22,4 +22,10 @@
     <string name="on_permissions_denied_msg">События календаря не будут отображаться.</string>
     <string name="read_calendar_rationale">Для отображения событий необходимо разрешение на чтение календаря.</string>
     <string name="on_permissions_denied_permanently_msg">Вы отказали в разрешении с опцией "Больше не спрашивать". События календаря не будут отображаться. Переустановите приложение.</string>
+    <string name="show_calendar_sheet">Показывать страничку календаря</string>
+    <string name="month_text_size">Размер текста месяца на страничке календаря</string>
+    <string name="month_text_color">Цвет текста месяца на страничке календаря</string>
+    <string name="date_text_size">Размер текста даты на страничке календаря</string>
+    <string name="date_text_color">Цвет текста даты на страничке календаря</string>
+    <string name="date_background_color">Цвет заднего фона даты на страничке календаря</string>
 </resources>

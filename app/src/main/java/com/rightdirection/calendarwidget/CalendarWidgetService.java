@@ -70,7 +70,7 @@ class CalendarWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViews
     @Override
     public void onDataSetChanged() {
         mTextColor = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_TEXT_COLOR);
-        mTextSize = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_TEXT_SIZE);
+        mTextSize = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_EVENT_TEXT_SIZE);
         mTodayTextColor = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_TODAY_TEXT_COLOR);
         mNumberOfEventsDisplayed = CalendarWidgetConfigureActivity.loadPrefValue(mContext, mWidgetID, CalendarWidgetConfigureActivity.PREF_KEY_NUMBER_OF_EVENTS_DISPLAYED);
 
