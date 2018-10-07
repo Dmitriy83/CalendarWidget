@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -101,6 +102,19 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
             confIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             confIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
             context.startActivity(confIntent);
+        }
+        else if (intent.getAction().equalsIgnoreCase("android.intent.action.PROVIDER_CHANGED")){
+            // Обновим виджеты при изменении события календаря
+            updateAllWidgets(context, new ComponentName(context, CalendarWidgetProvider.class));
+            updateAllWidgets(context, new ComponentName(context, CalendarWidgetProvider4x4.class));
+        }
+    }
+
+    private void updateAllWidgets(Context context, ComponentName componentName){
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
+        for (int widgetId : widgetManager.getAppWidgetIds(componentName)) {
+            widgetManager.updateAppWidget(widgetId, getRemoteViews(context,  widgetId));
+            widgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.events);
         }
     }
 
