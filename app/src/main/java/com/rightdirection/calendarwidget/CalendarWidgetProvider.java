@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,8 +34,10 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     private final static String ACTION_ITEM_ON_CLICK = "com.rightdirection.calendarwidget.itemonclick";
     private final static String ACTION_DATE_SHEET_ON_CLICK = "com.rightdirection.calendarwidget.datesheetonclick";
     private final static String ACTION_SETTINGS_ON_CLICK = "com.rightdirection.calendarwidget.settingsonclick";
+    public final static String ACTION_GOOGLE_CALENDAR_CHANGED = "com.rightdirection.calendarwidget.googlecalendarchanged";
     final static String EVENT = "event";
     private final String TAG = this.getClass().getSimpleName();
+    private static GoogleCalendarChangedReceiver mGoogleChangeCalendarReceiver;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -52,20 +55,34 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
-        // Когда пользоатель удаляет виджет, удаим настройки, связанные с ним
+        // Когда пользоатель удаляет виджет, удалим настройки, связанные с ним
         for (int appWidgetId : appWidgetIds) {
             CalendarWidgetConfigureActivity.deletePrefs(context, appWidgetId);
         }
     }
 
+    /**
+     Вызывается при создании первого виджета
+     * @param context - контекст провайдера
+     */
     @Override
     public void onEnabled(Context context) {
-        // Добавить функциональность при создании первого виджета
+        // Зарегистрируем приемник намериний об изменении событий календаря
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PROVIDER_CHANGED);
+        filter.addDataScheme("content");
+        filter.addDataAuthority("com.android.calendar", null);
+        mGoogleChangeCalendarReceiver = new GoogleCalendarChangedReceiver();
+        context.getApplicationContext().registerReceiver(mGoogleChangeCalendarReceiver, filter);
     }
 
+    /**
+     Вызывается после удаления последнего виджета
+     * @param context - контекст провайдера
+     */
     @Override
     public void onDisabled(Context context) {
-        // Добавить функциональность после отображения последнего виджета
+        context.getApplicationContext().unregisterReceiver(mGoogleChangeCalendarReceiver);
     }
 
     @Override
@@ -103,7 +120,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
             confIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
             context.startActivity(confIntent);
         }
-        else if (intent.getAction().equalsIgnoreCase("android.intent.action.PROVIDER_CHANGED")){
+        else if (intent.getAction().equalsIgnoreCase(ACTION_GOOGLE_CALENDAR_CHANGED)){
             // Обновим виджеты при изменении события календаря
             updateAllWidgets(context, new ComponentName(context, CalendarWidgetProvider.class));
             updateAllWidgets(context, new ComponentName(context, CalendarWidgetProvider4x4.class));
