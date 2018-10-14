@@ -24,7 +24,7 @@ import java.util.Locale;
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
 
 /**
- * Сервис для отображения сервиса календаря. Его вызывает ListAdapter.
+ * Сервис для отображения списка календаря. Его вызывает ListAdapter.
  */
 public class CalendarWidgetService extends RemoteViewsService {
     @Override

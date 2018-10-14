@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.CalendarContract;
@@ -34,10 +35,11 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     private final static String ACTION_ITEM_ON_CLICK = "com.rightdirection.calendarwidget.itemonclick";
     private final static String ACTION_DATE_SHEET_ON_CLICK = "com.rightdirection.calendarwidget.datesheetonclick";
     private final static String ACTION_SETTINGS_ON_CLICK = "com.rightdirection.calendarwidget.settingsonclick";
+    private final static String PROVIDER_CHANGED = "android.intent.action.PROVIDER_CHANGED";
     public final static String ACTION_GOOGLE_CALENDAR_CHANGED = "com.rightdirection.calendarwidget.googlecalendarchanged";
     final static String EVENT = "event";
     private final String TAG = this.getClass().getSimpleName();
-    private static GoogleCalendarChangedReceiver mGoogleChangeCalendarReceiver;
+    private static GoogleCalendarChangedReceiver mGoogleCalendarChangedReceiver;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -68,12 +70,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         // Зарегистрируем приемник намериний об изменении событий календаря
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_PROVIDER_CHANGED);
-        filter.addDataScheme("content");
-        filter.addDataAuthority("com.android.calendar", null);
-        mGoogleChangeCalendarReceiver = new GoogleCalendarChangedReceiver();
-        context.getApplicationContext().registerReceiver(mGoogleChangeCalendarReceiver, filter);
+        registerGoogleCalendarChangedReceiver(context);
     }
 
     /**
@@ -82,7 +79,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
      */
     @Override
     public void onDisabled(Context context) {
-        context.getApplicationContext().unregisterReceiver(mGoogleChangeCalendarReceiver);
+        unregisterGoogleCalendarChangedReceiver(context);
     }
 
     @Override
@@ -120,10 +117,28 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
             confIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
             context.startActivity(confIntent);
         }
-        else if (intent.getAction().equalsIgnoreCase(ACTION_GOOGLE_CALENDAR_CHANGED)){
+        else if (intent.getAction().equalsIgnoreCase(ACTION_GOOGLE_CALENDAR_CHANGED) || intent.getAction().equalsIgnoreCase(PROVIDER_CHANGED)){
             // Обновим виджеты при изменении события календаря
             updateAllWidgets(context, new ComponentName(context, CalendarWidgetProvider.class));
             updateAllWidgets(context, new ComponentName(context, CalendarWidgetProvider4x4.class));
+        }
+    }
+
+    private void registerGoogleCalendarChangedReceiver(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            unregisterGoogleCalendarChangedReceiver(context);
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_PROVIDER_CHANGED);
+            filter.addDataScheme("content");
+            filter.addDataAuthority("com.android.calendar", null);
+            mGoogleCalendarChangedReceiver = new GoogleCalendarChangedReceiver();
+            context.getApplicationContext().registerReceiver(mGoogleCalendarChangedReceiver, filter);
+        }
+    }
+
+    private void unregisterGoogleCalendarChangedReceiver(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mGoogleCalendarChangedReceiver != null) {
+            context.getApplicationContext().unregisterReceiver(mGoogleCalendarChangedReceiver);
         }
     }
 
@@ -161,6 +176,9 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     }
 
     private void calendarItemOnClick(Context context, Intent intent) {
+        // Зарегистрируем приемник перед открытием, чтобы после изменения события календаря обновился виджет.
+        //  Долго этот приемник не просуществует (пока сборщик мусора не удалит класс из памяти)
+        registerGoogleCalendarChangedReceiver(context);
         CalendarEvent event = intent.getParcelableExtra(EVENT);
         if (event != null) {
             // Откроем событие
